@@ -58,3 +58,40 @@ Please refer https://kafka.apache.org/20/documentation/streams/developer-guide/d
 To get started with KStream, follow these steps:
 
 1. Install librdkafka(https://github.com/confluentinc/librdkafka#installation).
+
+## Kafka Client Adaptors
+
+KStream ships with three Kafka client adaptors: **librd** (default), **sarama**, and **franz-go**.
+
+### Using franz-go instead of librd
+
+No native dependency required — franz-go is a pure-Go Kafka client.
+
+**Runtime selection via environment variable:**
+
+```bash
+KSTREAM_CLIENT=franz go run ./your-app
+```
+
+**Programmatic selection:**
+
+```go
+import "github.com/gmbyapa/kstream/v2/kafka/adaptors/franz"
+
+// Select adaptor explicitly
+providers := franz.ProvidersFor(franz.ClientFranz, bootstrapServers)
+
+// Or read from KSTREAM_CLIENT env (defaults to librd when unset)
+providers := franz.ProvidersFromEnv(bootstrapServers)
+
+// Wire providers into your stream builder config
+config.Consumer.Providers.GroupConsumer = providers.GroupConsumer
+config.Consumer.Providers.PartitionConsumer = providers.Consumer
+config.Producer.Provider = providers.Producer
+```
+
+> **Note on EOS:** The franz-go adaptor supports transactional producers.
+> True exactly-once semantics (EOS) via `SendOffsetsToTransaction` currently
+> commits offsets through the admin path (at-least-once). Full EOS support
+> requires a `kgo.GroupTransactSession` refactor — tracked as a TODO in
+> `kafka/adaptors/franz/producer.go`.
