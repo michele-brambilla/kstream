@@ -148,9 +148,10 @@ func (g *groupConsumer) consumeLoop() {
 		}
 
 		sess := &groupSession{
-			client: g.client,
-			tps:    tps,
-			assign: &assignment{tps: tps},
+			client:  g.client,
+			tps:     tps,
+			assign:  &assignment{tps: tps},
+			groupID: g.config.GroupId,
 		}
 
 		if g.handler != nil {
@@ -269,7 +270,7 @@ func (s *groupSession) MarkOffset(_ context.Context, record kafka.Record, _ stri
 	s.client.MarkCommitRecords(&kgo.Record{
 		Topic:     record.Topic(),
 		Partition: record.Partition(),
-		Offset:    record.Offset(),
+		Offset:    record.Offset() + 1,
 	})
 	return nil
 }
@@ -278,7 +279,7 @@ func (s *groupSession) CommitOffset(ctx context.Context, record kafka.Record, _ 
 	s.client.MarkCommitRecords(&kgo.Record{
 		Topic:     record.Topic(),
 		Partition: record.Partition(),
-		Offset:    record.Offset(),
+		Offset:    record.Offset() + 1,
 	})
 	if err := s.client.CommitUncommittedOffsets(ctx); err != nil {
 		return errors.Wrap(err, `franz CommitOffset failed`)
@@ -412,13 +413,25 @@ func (c *partitionConsumer) ConsumePartition(ctx context.Context, topic string, 
 		topic: {partitionID: toKgoOffset(offset)},
 	})
 
+	startOffset, err := c.GetOffsetOldest(topic, partitionID)
+	if err != nil {
+		return nil, errors.Wrapf(err, `franz ConsumePartition: cannot fetch start offset for %s[%d]`, topic, partitionID)
+	}
+
+	endOffset, err := c.GetOffsetLatest(topic, partitionID)
+	if err != nil {
+		return nil, errors.Wrapf(err, `franz ConsumePartition: cannot fetch end offset for %s[%d]`, topic, partitionID)
+	}
+
 	p := &franzPartition{
-		topic:     topic,
-		partition: partitionID,
-		events:    make(chan kafka.Event, c.config.ConsumerMessageChanSize),
-		client:    c.client,
-		config:    c.config,
-		stopCh:    make(chan struct{}),
+		topic:       topic,
+		partition:   partitionID,
+		events:      make(chan kafka.Event, c.config.ConsumerMessageChanSize),
+		client:      c.client,
+		config:      c.config,
+		stopCh:      make(chan struct{}),
+		beginOffset: startOffset,
+		endOffset:   endOffset,
 	}
 	c.partitions[key] = p
 	go p.consumeLoop(ctx)

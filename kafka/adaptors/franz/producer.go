@@ -160,6 +160,7 @@ func (p *franzProducer) Restart() error {
 	}
 
 	p.client = client
+	p.admin = kadm.NewClient(client)
 	return nil
 }
 
@@ -199,15 +200,18 @@ func (p *franzProducer) SendOffsetsToTransaction(ctx context.Context, offsets []
 		return errors.New(`franz SendOffsetsToTransaction: GroupMeta.Meta must be a non-empty string groupID`)
 	}
 
-	// Build a kadm.Offsets map (next-offset = committed + 1).
+	// TODO: franz-go does not expose a public AddOffsetsToTxn/SendOffsetsToTransaction
+	// equivalent on *kgo.Client. True EOS (Exactly-Once Semantics) requires
+	// kgo.GroupTransactSession which couples consumer and producer on one client.
+	// Until the adaptor is restructured to use GroupTransactSession, offsets are
+	// committed via the admin path (outside the open transaction). This is correct
+	// for at-least-once semantics but does NOT provide EOS guarantees.
 	kadmOffsets := make(kadm.Offsets)
 	for _, o := range offsets {
 		kadmOffsets.AddOffset(o.Topic, o.Partition, o.Offset+1, -1)
 	}
 
-	// Commit offsets to the __consumer_offsets topic as part of the open transaction.
-	_, err := p.admin.CommitOffsets(ctx, groupID, kadmOffsets)
-	if err != nil {
+	if _, err := p.admin.CommitOffsets(ctx, groupID, kadmOffsets); err != nil {
 		return errors.Wrap(err, `franz SendOffsetsToTransaction failed`)
 	}
 	return nil
