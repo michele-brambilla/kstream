@@ -223,7 +223,7 @@ func newPartitionClaim(tp kafka.TopicPartition, bufSize int) *partitionClaim {
 }
 
 func (c *partitionClaim) TopicPartition() kafka.TopicPartition { return c.tp }
-func (c *partitionClaim) Records() <-chan kafka.Record          { return c.messages }
+func (c *partitionClaim) Records() <-chan kafka.Record         { return c.messages }
 
 // ---------------------------------------------------------------------------
 // assignment — implements kafka.Assignment

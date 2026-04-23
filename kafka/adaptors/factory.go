@@ -1,10 +1,12 @@
 package adaptors
 
 import (
+	"log"
 	"os"
 
+	"github.com/michele-brambilla/kstream/v2/kafka/adaptors/franz"
+
 	"github.com/gmbyapa/kstream/v2/kafka"
-	franz "github.com/gmbyapa/kstream/v2/kafka/adaptors/franz"
 	"github.com/gmbyapa/kstream/v2/kafka/adaptors/librd"
 )
 
@@ -33,8 +35,10 @@ type Providers struct {
 func ProvidersFromEnv(bootstrapServers []string) Providers {
 	switch ClientType(os.Getenv(envKey)) {
 	case ClientFranz:
+		log.Print("Using franz-go adaptor")
 		return franzProviders(bootstrapServers)
 	default:
+		log.Print("Using librd adaptor")
 		return librdProviders(bootstrapServers)
 	}
 }
@@ -45,7 +49,8 @@ func ProvidersFor(ct ClientType, bootstrapServers []string) Providers {
 	case ClientFranz:
 		return franzProviders(bootstrapServers)
 	default:
-		return librdProviders(bootstrapServers)
+		return franzProviders(bootstrapServers)
+		// return librdProviders(bootstrapServers)
 	}
 }
 

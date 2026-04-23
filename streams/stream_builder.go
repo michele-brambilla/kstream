@@ -2,10 +2,10 @@ package streams
 
 import (
 	"fmt"
+
 	"github.com/gmbyapa/kstream/v2/backend"
 	"github.com/gmbyapa/kstream/v2/backend/pebble"
 	"github.com/gmbyapa/kstream/v2/kafka"
-	librd3Adpt "github.com/gmbyapa/kstream/v2/kafka/adaptors/librd"
 	"github.com/gmbyapa/kstream/v2/kafka/adaptors/sarama"
 	"github.com/gmbyapa/kstream/v2/pkg/errors"
 	"github.com/gmbyapa/kstream/v2/streams/encoding"
@@ -13,6 +13,7 @@ import (
 	"github.com/gmbyapa/kstream/v2/streams/stores"
 	"github.com/gmbyapa/kstream/v2/streams/tasks"
 	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/kafka/adaptors"
 	"github.com/tryfix/log"
 	"github.com/tryfix/metrics/v2"
 )
@@ -273,10 +274,18 @@ func (b *StreamBuilder) setupOpts(opts ...BuilderOpt) {
 
 	b.kafkaAdmin = admin
 
+	providers := adaptors.ProvidersFromEnv(b.config.BootstrapServers)
+
 	// Apply default adaptors
-	b.providers.groupConsumer = librd3Adpt.NewGroupConsumerProvider(librd3Adpt.NewGroupConsumerConfig())
-	b.providers.consumer = librd3Adpt.NewConsumerProvider(librd3Adpt.NewConsumerConfig())
-	b.providers.producer = librd3Adpt.NewProducerProvider(librd3Adpt.NewProducerConfig())
+	// b.providers.groupConsumer = librd3Adpt.NewGroupConsumerProvider(librd3Adpt.NewGroupConsumerConfig())
+	// b.providers.consumer = librd3Adpt.NewConsumerProvider(librd3Adpt.NewConsumerConfig())
+	// b.providers.producer = librd3Adpt.NewProducerProvider(librd3Adpt.NewProducerConfig())
+	b.providers.groupConsumer = providers.GroupConsumer
+	b.providers.consumer = providers.Consumer
+	b.providers.producer = providers.Producer
+
+	fmt.Printf("Using providers: groupConsumer=%T, consumer=%T, producer=%T",
+		b.providers.groupConsumer, b.providers.consumer, b.providers.producer)
 
 	for _, opt := range opts {
 		opt(b)
