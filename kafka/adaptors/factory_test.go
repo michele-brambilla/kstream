@@ -1,4 +1,4 @@
-package franz
+package adaptors
 
 import (
 	"os"
@@ -36,7 +36,7 @@ func TestProvidersFromEnv_franzWhenEnvSet(t *testing.T) {
 func TestProvidersFor_franz(t *testing.T) {
 	p := ProvidersFor(ClientFranz, []string{"localhost:9092"})
 	if p.Producer == nil || p.GroupConsumer == nil || p.Consumer == nil {
-		t.Error("expected all providers non-nil for ClientFranz")
+		t.Error("expected all providers non-nil for franz.ClientFranz")
 	}
 }
 

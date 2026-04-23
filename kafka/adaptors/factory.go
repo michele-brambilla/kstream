@@ -1,9 +1,10 @@
-package franz
+package adaptors
 
 import (
 	"os"
 
 	"github.com/gmbyapa/kstream/v2/kafka"
+	franz "github.com/gmbyapa/kstream/v2/kafka/adaptors/franz"
 	"github.com/gmbyapa/kstream/v2/kafka/adaptors/librd"
 )
 
@@ -49,19 +50,19 @@ func ProvidersFor(ct ClientType, bootstrapServers []string) Providers {
 }
 
 func franzProviders(bootstrapServers []string) Providers {
-	prodConf := NewProducerConfig()
+	prodConf := franz.NewProducerConfig()
 	prodConf.BootstrapServers = bootstrapServers
 
-	gcConf := NewGroupConsumerConfig()
+	gcConf := franz.NewGroupConsumerConfig()
 	gcConf.BootstrapServers = bootstrapServers
 
-	cConf := NewConsumerConfig()
+	cConf := franz.NewConsumerConfig()
 	cConf.BootstrapServers = bootstrapServers
 
 	return Providers{
-		Producer:      NewProducerProvider(prodConf),
-		GroupConsumer: NewGroupConsumerProvider(gcConf),
-		Consumer:      NewConsumerProvider(cConf),
+		Producer:      franz.NewProducerProvider(prodConf),
+		GroupConsumer: franz.NewGroupConsumerProvider(gcConf),
+		Consumer:      franz.NewConsumerProvider(cConf),
 	}
 }
 
