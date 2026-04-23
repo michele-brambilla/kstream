@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
 
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/pkg/async"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/pkg/async"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 	"github.com/tryfix/log"
 	"github.com/tryfix/metrics/v2"
 )
@@ -279,6 +279,9 @@ func (t *task) process(record *Record) error {
 
 		return err
 	}
+
+	// Instrumentation: print a short, visible line for processed records
+	fmt.Printf("kstream: processed record topic=%s partition=%d offset=%d\n", record.Topic(), record.Partition(), record.Offset())
 
 	return nil
 }

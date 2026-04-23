@@ -4,15 +4,16 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/kafka/adaptors/librd"
-	"github.com/gmbyapa/kstream/v2/streams"
-	"github.com/gmbyapa/kstream/v2/streams/encoding"
-	"github.com/tryfix/log"
 	"os"
 	"os/signal"
 	"strings"
 	"time"
+
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/kafka/adaptors"
+	"github.com/michele-brambilla/kstream/v2/streams"
+	"github.com/michele-brambilla/kstream/v2/streams/encoding"
+	"github.com/tryfix/log"
 )
 
 var bootstrapServers = flag.String(`bootstrap-servers`, `192.168.0.101:9092`,
@@ -77,11 +78,15 @@ func buildTopology(builder *streams.StreamBuilder) {
 }
 
 func seed(logger log.Logger) {
-	conf := librd.NewProducerConfig()
-	conf.BootstrapServers = strings.Split(*bootstrapServers, `,`)
-	conf.Transactional.Enabled = true
-	conf.Transactional.Id = `words-producer`
-	producer, err := librd.NewProducer(conf)
+	providers := adaptors.ProvidersFromEnv(strings.Split(*bootstrapServers, `,`))
+
+	// Build a transactional producer via the provider's builder
+	producerBuilder := providers.Producer.NewBuilder(&kafka.ProducerConfig{})
+	producer, err := producerBuilder(func(pc *kafka.ProducerConfig) {
+		pc.BootstrapServers = strings.Split(*bootstrapServers, `,`)
+		pc.Transactional.Enabled = true
+		pc.Transactional.Id = `words-producer`
+	})
 	if err != nil {
 		panic(err)
 	}

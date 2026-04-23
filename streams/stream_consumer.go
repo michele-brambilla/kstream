@@ -2,10 +2,10 @@ package streams
 
 import (
 	"fmt"
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
-	"github.com/gmbyapa/kstream/v2/streams/tasks"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/streams/tasks"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 	"github.com/tryfix/log"
 	"sync"
 )
@@ -19,7 +19,12 @@ type streamConsumer struct {
 	taskManager tasks.TaskManager
 
 	consumers []*streamConsumerInstance
-	running   chan struct{}
+	// running is closed once all instances have successfully subscribed
+	running chan struct{}
+	// stop is closed by Stop() to signal Run() to exit
+	stop chan struct{}
+	// done is closed by Run() when it is about to return
+	done chan struct{}
 }
 
 func (r *streamConsumer) Init(_ topology.Topology) error { return nil }
@@ -82,7 +87,25 @@ func (r *streamConsumer) Run(topologyBuilder topology.Topology) error {
 
 	wg.Wait()
 
+	// signal that subscription is complete
+	if r.running == nil {
+		r.running = make(chan struct{})
+	}
 	close(r.running)
+
+	// initialize stop/done if not already
+	if r.stop == nil {
+		r.stop = make(chan struct{})
+	}
+	if r.done == nil {
+		r.done = make(chan struct{})
+	}
+
+	// block until Stop() signals exit
+	<-r.stop
+
+	// signal Stop() that Run() is exiting
+	close(r.done)
 
 	return nil
 }
@@ -103,7 +126,18 @@ func (r *streamConsumer) Stop() error {
 		}(instance)
 	}
 
-	<-r.running
+	// wait until subscriptions are active
+	if r.running != nil {
+		<-r.running
+	}
+
+	// signal Run() to finish and wait for it
+	if r.stop != nil {
+		close(r.stop)
+	}
+	if r.done != nil {
+		<-r.done
+	}
 
 	return nil
 }

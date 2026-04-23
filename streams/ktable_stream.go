@@ -1,8 +1,8 @@
 package streams
 
 import (
-	"github.com/gmbyapa/kstream/v2/streams/processors"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/streams/processors"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 )
 
 type Table interface {

@@ -2,11 +2,11 @@ package streams
 
 import (
 	"context"
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/pkg/async"
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
-	"github.com/gmbyapa/kstream/v2/streams/tasks"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/pkg/async"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/streams/tasks"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 	"github.com/tryfix/log"
 )
 

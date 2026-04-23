@@ -1,6 +1,6 @@
 package topology
 
-import "github.com/gmbyapa/kstream/v2/kafka"
+import "github.com/michele-brambilla/kstream/v2/kafka"
 
 // ProcessorInterceptor wraps task-level record processing.
 type ProcessorInterceptor interface {

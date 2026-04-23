@@ -2,10 +2,10 @@ package streams
 
 import (
 	"context"
-	"github.com/gmbyapa/kstream/v2/streams/encoding"
-	"github.com/gmbyapa/kstream/v2/streams/processors"
-	"github.com/gmbyapa/kstream/v2/streams/state_stores"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/streams/encoding"
+	"github.com/michele-brambilla/kstream/v2/streams/processors"
+	"github.com/michele-brambilla/kstream/v2/streams/state_stores"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 )
 
 type StreamTopology interface {

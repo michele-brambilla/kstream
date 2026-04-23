@@ -2,10 +2,10 @@ package processors
 
 import (
 	"context"
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
 
-	"github.com/gmbyapa/kstream/v2/streams/stores"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/streams/stores"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 )
 
 type StreamJoinerOption func(joiner *StreamJoiner)

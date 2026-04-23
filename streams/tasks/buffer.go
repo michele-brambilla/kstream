@@ -3,9 +3,9 @@ package tasks
 import (
 	"context"
 	"fmt"
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 	"github.com/tryfix/metrics/v2"
 	"sync"
 	"time"
