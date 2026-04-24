@@ -26,7 +26,7 @@ func main() {
 
 	config := streams.NewStreamBuilderConfig()
 	config.BootstrapServers = strings.Split(*bootstrapServers, `,`)
-	config.ApplicationId = `kstream-branching`
+	config.ApplicationId = `kstream-branching-a`
 	config.Consumer.Offsets.Initial = kafka.OffsetEarliest
 
 	seed(config.Logger)
@@ -78,7 +78,7 @@ func buildTopology(builder *streams.StreamBuilder) {
 }
 
 func seed(logger log.Logger) {
-	providers := adaptors.ProvidersFromEnv(strings.Split(*bootstrapServers, `,`))
+	providers := adaptors.ProvidersFor(adaptors.ClientLibrd, strings.Split(*bootstrapServers, `,`))
 
 	// Build a transactional producer via the provider's builder
 	producerBuilder := providers.Producer.NewBuilder(&kafka.ProducerConfig{})

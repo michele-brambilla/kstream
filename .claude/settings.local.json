@@ -16,7 +16,8 @@
       "Bash(gofmt -w kafka/adaptors/*.go)",
       "Bash(gofmt -w examples/split/main.go)",
       "Bash(go vet *)",
-      "Bash(gofmt -w kafka/adaptors/franz)"
+      "Bash(gofmt -w kafka/adaptors/franz)",
+      "Bash(gofmt -w kafka/adaptors/librd)"
     ]
   }
 }
