@@ -1,7 +1,7 @@
 module github.com/michele-brambilla/kstream/v2
 
 // Compatibility replace to unify imports
-replace github.com/gmbyapa/kstream/v2 => github.com/michele-brambilla/kstream/v2 v2.0.0-20260423144018-ef19acaa0d02
+replace github.com/michele-brambilla/kstream/v2 => github.com/michele-brambilla/kstream/v2 v2.0.0-20260424100147-c0adb40eba7e
 
 go 1.25.0
 
@@ -11,7 +11,6 @@ require (
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/cockroachdb/pebble v1.1.2
 	github.com/confluentinc/confluent-kafka-go/v2 v2.5.3
-	github.com/gmbyapa/kstream/v2 v2.2.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.8.1

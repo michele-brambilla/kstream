@@ -1,9 +1,9 @@
 # KStream - Kafka Streams for Golang
 
-[![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://pkg.go.dev/github.com/gmbyapa/kstream/v2)
-[![Releases](https://img.shields.io/github/release/gmbyapa/kstream/all.svg?style=flat-square)](https://github.com/gmbyapa/kstream/v2/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/gmbyapa/kstream/v2)](https://goreportcard.com/report/github.com/gmbyapa/kstream/v2)
-[![LICENSE](https://img.shields.io/github/license/gmbyapa/kstream.svg?style=flat-square)](https://github.com/gmbyapa/kstream/v2/blob/master/LICENSE)
+[![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://pkg.go.dev/github.com/michele-brambilla/kstream/v2)
+[![Releases](https://img.shields.io/github/release/gmbyapa/kstream/all.svg?style=flat-square)](https://github.com/michele-brambilla/kstream/v2/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/michele-brambilla/kstream/v2)](https://goreportcard.com/report/github.com/michele-brambilla/kstream/v2)
+[![LICENSE](https://img.shields.io/github/license/gmbyapa/kstream.svg?style=flat-square)](https://github.com/michele-brambilla/kstream/v2/blob/master/LICENSE)
 
 KStream is a [kafka streams](https://kafka.apache.org/documentation/streams/) implementation written in Golang. It is
 heavily influenced by Kafka-Streams(Java) library and includes features such as Streams, Tables, State Stores,
@@ -76,7 +76,7 @@ KSTREAM_CLIENT=franz go run ./your-app
 **Programmatic selection:**
 
 ```go
-import "github.com/gmbyapa/kstream/v2/kafka/adaptors/franz"
+import "github.com/michele-brambilla/kstream/v2/kafka/adaptors/franz"
 
 // Select adaptor explicitly
 providers := franz.ProvidersFor(franz.ClientFranz, bootstrapServers)
