@@ -89,6 +89,7 @@ func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) 
 	// set after the groupConsumer is created and the Subscribe call stores the
 	// handler reference.
 	var handlerPtr *kafka.RebalanceHandler
+	var errs chan error
 
 	opts := []kgo.Opt{
 		kgo.SeedBrokers(config.BootstrapServers...),
@@ -171,7 +172,10 @@ func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) 
 	}
 	// Wire the handler pointer so the assigned callback can call the user's handler
 	handlerPtr = &gc.handler
-	// Drain internal errors to stdout for visibility during debugging.
+	// Capture errs channel so callback can write into it even though it runs
+	// inside franz-go's goroutines.
+	errs = gc.errs
+	// Drain internal errors to avoid blocking the writer; caller may read Errors().
 	go gc.drainErrors()
 	return gc, nil
 }
