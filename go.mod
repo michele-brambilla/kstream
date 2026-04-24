@@ -1,8 +1,5 @@
 module github.com/michele-brambilla/kstream/v2
 
-// Compatibility replace to unify imports
-replace github.com/michele-brambilla/kstream/v2 => github.com/michele-brambilla/kstream/v2 v2.0.0-20260424100147-c0adb40eba7e
-
 go 1.25.0
 
 require (
