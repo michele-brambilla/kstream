@@ -9,15 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/michele-brambilla/kstream/v2/kafka/adaptors"
-
 	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/kafka/adaptors"
 	"github.com/michele-brambilla/kstream/v2/streams"
 	"github.com/michele-brambilla/kstream/v2/streams/encoding"
 	"github.com/tryfix/log"
-
-	"net/http"
-	_ "net/http/pprof"
 )
 
 var bootstrapServers = flag.String(`bootstrap-servers`, `192.168.0.101:9092`,
@@ -26,24 +22,14 @@ var bootstrapServers = flag.String(`bootstrap-servers`, `192.168.0.101:9092`,
 const TopicNumbers = `numbers`
 
 func main() {
-	if os.Getenv("ENABLE_PPROF") == "1" {
-		go func() {
-			log.Info(http.ListenAndServe("localhost:6060", nil))
-		}()
-	}
-
 	flag.Parse()
 
 	config := streams.NewStreamBuilderConfig()
-	config.Logger = log.StdLogger.NewLog(log.WithLevel(log.TRACE))
 	config.BootstrapServers = strings.Split(*bootstrapServers, `,`)
-	config.ApplicationId = `kstream-branching-test`
+	config.ApplicationId = `kstream-branching`
 	config.Consumer.Offsets.Initial = kafka.OffsetEarliest
 
-	// Optionally seed test messages when ENABLE_SEED=1. Disabled by default.
-	if os.Getenv("ENABLE_SEED") == "1" {
-		seed(config.Logger)
-	}
+	seed(config.Logger)
 
 	builder := streams.NewStreamBuilder(config)
 	buildTopology(builder)
