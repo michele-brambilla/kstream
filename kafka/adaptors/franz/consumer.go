@@ -71,12 +71,17 @@ type groupConsumer struct {
 }
 
 func (g *groupConsumer) drainErrors() {
-	// Previously this drained g.errs and discarded errors which hid issues and
-	// leaked a goroutine because errs was never closed. Instead, stop draining
-	// here and make error sends non-blocking where appropriate; callers may
-	// read from Errors(). If we later need an internal logger, use g.config.Logger.
-	// Keep this function as a noop to preserve the symbol for older callsites.
-	return
+	// Drain g.errs until shutdown so producers sending errors do not block if
+	// callers never read from Errors(). Exit on stopCh to avoid leaking the
+	// draining goroutine even if errs is never closed.
+	for {
+		select {
+		case <-g.stopCh:
+			return
+		case <-g.errs:
+			// discard
+		}
+	}
 }
 
 func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) {

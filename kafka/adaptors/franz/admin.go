@@ -118,21 +118,30 @@ func (a *kAdmin) CreateTopics(topics []*kafka.Topic) error {
 			configs[k] = &v
 		}
 
-		ctx, cancel := a.callCtx()
-		defer cancel()
-		responses, err := a.admin.CreateTopics(ctx, t.NumPartitions, t.ReplicationFactor, configs, t.Name)
-		if err != nil {
-			return errors.Wrapf(err, `franz admin CreateTopics: topic [%s] failed`, t.Name)
-		}
-
-		for _, resp := range responses {
-			if resp.Err != nil {
-				// Ignore already-exists — same as librd adaptor.
-				if errors.Is(resp.Err, kerr.TopicAlreadyExists) {
-					continue
-				}
-				return errors.Wrapf(resp.Err, `franz admin CreateTopics: topic [%s] error`, resp.Topic)
+		// Scope the context to an inner function so its cancel runs at the end of
+		// this iteration instead of being deferred until CreateTopics returns for
+		// the entire topics slice.
+		err := func() error {
+			ctx, cancel := a.callCtx()
+			defer cancel()
+			responses, err := a.admin.CreateTopics(ctx, t.NumPartitions, t.ReplicationFactor, configs, t.Name)
+			if err != nil {
+				return errors.Wrapf(err, `franz admin CreateTopics: topic [%s] failed`, t.Name)
 			}
+
+			for _, resp := range responses {
+				if resp.Err != nil {
+					// Ignore already-exists — same as librd adaptor.
+					if errors.Is(resp.Err, kerr.TopicAlreadyExists) {
+						continue
+					}
+					return errors.Wrapf(resp.Err, `franz admin CreateTopics: topic [%s] error`, resp.Topic)
+				}
+			}
+			return nil
+		}()
+		if err != nil {
+			return err
 		}
 	}
 	return nil
