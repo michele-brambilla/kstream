@@ -48,9 +48,10 @@ func ProvidersFor(ct ClientType, bootstrapServers []string) Providers {
 	switch ct {
 	case ClientFranz:
 		return franzProviders(bootstrapServers)
+	case ClientLibrd:
+		return librdProviders(bootstrapServers)
 	default:
-		return franzProviders(bootstrapServers)
-		// return librdProviders(bootstrapServers)
+		return librdProviders(bootstrapServers)
 	}
 }
 

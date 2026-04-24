@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch",
+      "Bash(tree)",
+      "Bash(ls:*)",
+      "mcp__plugin_context-mode_context-mode__ctx_fetch_and_index",
+      "mcp__plugin_context-mode_context-mode__ctx_search",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute",
+      "Bash(go get *)",
+      "Bash(go build *)",
+      "Bash(go test *)",
+      "Bash(gofmt -w kafka/adaptors/factory_test.go)",
+      "Bash(gofmt -w kafka/adaptors/*.go)",
+      "Bash(gofmt -w examples/split/main.go)",
+      "Bash(go vet *)",
+      "Bash(gofmt -w kafka/adaptors/franz)"
+    ]
+  }
+}

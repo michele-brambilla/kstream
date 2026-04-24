@@ -71,11 +71,12 @@ type groupConsumer struct {
 }
 
 func (g *groupConsumer) drainErrors() {
-	// Consume errors so the channel doesn't block; errors are surfaced via
-	// the Errors() channel for callers to handle. Do not print to stdout.
-	for range g.errs {
-		// intentionally discard here
-	}
+	// Previously this drained g.errs and discarded errors which hid issues and
+	// leaked a goroutine because errs was never closed. Instead, stop draining
+	// here and make error sends non-blocking where appropriate; callers may
+	// read from Errors(). If we later need an internal logger, use g.config.Logger.
+	// Keep this function as a noop to preserve the symbol for older callsites.
+	return
 }
 
 func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) {
@@ -104,7 +105,6 @@ func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) 
 			if handlerPtr == nil || *handlerPtr == nil {
 				return
 			}
-
 
 			// Convert assigned map to kafka.TopicPartitions
 			tps := make(kafka.TopicPartitions, 0, 32)
@@ -214,10 +214,12 @@ func (g *groupConsumer) consumeLoop() {
 			total++
 		})
 
-		fmt.Printf("franz: fetch summary: partitions=%d records=%d\n", len(byPartition), total)
+		// For debugging during development we previously logged fetch summaries to
+		// stdout; in library code prefer emitting via the error channel or a
+		// configured logger. Skip noisy printf here.
 
 		if len(byPartition) == 0 {
-			g.errs <- fmt.Errorf("franz: no records in this poll")
+			// Empty polls are normal; don't emit an error. Just continue.
 			continue
 		}
 
@@ -235,11 +237,8 @@ func (g *groupConsumer) consumeLoop() {
 		}
 
 		if g.handler != nil {
-			fmt.Printf("franz: invoking OnPartitionAssigned tps=%v\n", tps)
 			if err := g.handler.OnPartitionAssigned(ctx, sess); err != nil {
 				g.errs <- errors.Wrap(err, `OnPartitionAssigned error`)
-			} else {
-				fmt.Printf("franz: OnPartitionAssigned returned successfully for tps=%v\n", tps)
 			}
 		}
 
