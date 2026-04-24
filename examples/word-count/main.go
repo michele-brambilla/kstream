@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/bxcodec/faker/v3"
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/kafka/adaptors/librd"
-	"github.com/gmbyapa/kstream/v2/streams"
-	"github.com/gmbyapa/kstream/v2/streams/encoding"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/kafka/adaptors/librd"
+	"github.com/michele-brambilla/kstream/v2/streams"
+	"github.com/michele-brambilla/kstream/v2/streams/encoding"
 	"github.com/tryfix/log"
 )
 

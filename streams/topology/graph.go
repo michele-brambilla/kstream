@@ -3,7 +3,7 @@ package topology
 import (
 	"fmt"
 	"github.com/awalterschulze/gographviz"
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
 )
 
 type Visualizer interface {

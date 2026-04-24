@@ -1,6 +1,6 @@
 package streams
 
-import "github.com/gmbyapa/kstream/v2/streams/topology"
+import "github.com/michele-brambilla/kstream/v2/streams/topology"
 
 type Consumer interface {
 	Run(topologyBuilder topology.Topology) error

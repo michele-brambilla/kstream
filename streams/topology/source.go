@@ -1,8 +1,8 @@
 package topology
 
 import (
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/streams/encoding"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/streams/encoding"
 )
 
 type SourceEncoder struct {

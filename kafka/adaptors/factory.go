@@ -6,8 +6,8 @@ import (
 
 	"github.com/michele-brambilla/kstream/v2/kafka/adaptors/franz"
 
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/kafka/adaptors/librd"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/kafka/adaptors/librd"
 )
 
 const envKey = "KSTREAM_CLIENT"

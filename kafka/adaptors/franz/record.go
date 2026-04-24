@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gmbyapa/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/kafka"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 

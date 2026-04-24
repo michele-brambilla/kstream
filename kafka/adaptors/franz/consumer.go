@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
@@ -130,14 +130,19 @@ func (g *groupConsumer) consumeLoop() {
 			g.errs <- fmt.Errorf("kafka fetch error [%s#%d]: %w", t, p, err)
 		})
 
-		// Group records by TopicPartition for handler dispatch.
+		// Group records by TopicPartition for handler dispatch and count records.
 		byPartition := make(map[kafka.TopicPartition][]*kgo.Record)
+		total := 0
 		fetches.EachRecord(func(r *kgo.Record) {
 			tp := kafka.TopicPartition{Topic: r.Topic, Partition: r.Partition}
 			byPartition[tp] = append(byPartition[tp], r)
+			total++
 		})
 
+		fmt.Printf("franz: fetch summary: partitions=%d records=%d\n", len(byPartition), total)
+
 		if len(byPartition) == 0 {
+			g.errs <- fmt.Errorf("franz: no records in this poll")
 			continue
 		}
 

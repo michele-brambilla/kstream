@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 )
 
 type changeLogger struct {

@@ -8,7 +8,7 @@
 package mocks
 
 import (
-	"github.com/gmbyapa/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/kafka"
 )
 
 type MockKafkaAdmin struct {

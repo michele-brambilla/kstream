@@ -1,5 +1,8 @@
 module github.com/michele-brambilla/kstream/v2
 
+// Compatibility replace to unify imports
+replace github.com/gmbyapa/kstream/v2 => github.com/michele-brambilla/kstream/v2 v2.0.0-20260423144018-ef19acaa0d02
+
 go 1.25.0
 
 require (
@@ -50,6 +53,7 @@ require (
 	github.com/logrusorgru/aurora/v4 v4.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pierrec/lz4/v4 v4.1.26 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

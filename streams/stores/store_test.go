@@ -3,7 +3,7 @@ package stores
 import (
 	"context"
 	"fmt"
-	"github.com/gmbyapa/kstream/v2/streams/encoding"
+	"github.com/michele-brambilla/kstream/v2/streams/encoding"
 	"reflect"
 	"sort"
 	"testing"

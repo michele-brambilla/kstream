@@ -1,8 +1,8 @@
 package mock
 
 import (
-	"github.com/gmbyapa/kstream/v2/backend"
-	"github.com/gmbyapa/kstream/v2/backend/pebble"
+	"github.com/michele-brambilla/kstream/v2/backend"
+	"github.com/michele-brambilla/kstream/v2/backend/pebble"
 	"os"
 	"time"
 )

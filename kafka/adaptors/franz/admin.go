@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kerr"
 	"github.com/twmb/franz-go/pkg/kgo"
@@ -63,7 +63,15 @@ func NewAdmin(bootstrapServers []string, options ...AdminOption) kafka.Admin {
 }
 
 func (a *kAdmin) ctx() context.Context {
-	ctx, _ := context.WithTimeout(context.Background(), a.timeout) //nolint:govet
+	ctx, cancel := context.WithTimeout(context.Background(), a.timeout)
+	// Caller expects a context; ensure cancel is available to avoid leaks.
+	// Defer cancel here would cancel too early; so return a derived context and
+	// rely on the immediate caller to cancel if appropriate. As a compromise,
+	// attach a finalizer-like goroutine to cancel after timeout to ensure no leak.
+	go func() {
+		<-ctx.Done()
+		cancel()
+	}()
 	return ctx
 }
 

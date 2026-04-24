@@ -2,8 +2,8 @@ package stores
 
 //import (
 //	"context"
-//	"github.com/gmbyapa/kstream/v2/backend"
-//	"github.com/gmbyapa/kstream/v2/streams/encoding"
+//	"github.com/michele-brambilla/kstream/v2/backend"
+//	"github.com/michele-brambilla/kstream/v2/streams/encoding"
 //	"time"
 //)
 //

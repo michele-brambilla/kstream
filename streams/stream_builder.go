@@ -3,17 +3,17 @@ package streams
 import (
 	"fmt"
 
-	"github.com/gmbyapa/kstream/v2/backend"
-	"github.com/gmbyapa/kstream/v2/backend/pebble"
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/kafka/adaptors/sarama"
-	"github.com/gmbyapa/kstream/v2/pkg/errors"
-	"github.com/gmbyapa/kstream/v2/streams/encoding"
-	"github.com/gmbyapa/kstream/v2/streams/state_stores"
-	"github.com/gmbyapa/kstream/v2/streams/stores"
-	"github.com/gmbyapa/kstream/v2/streams/tasks"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/backend"
+	"github.com/michele-brambilla/kstream/v2/backend/pebble"
+	"github.com/michele-brambilla/kstream/v2/kafka"
 	"github.com/michele-brambilla/kstream/v2/kafka/adaptors"
+	"github.com/michele-brambilla/kstream/v2/kafka/adaptors/sarama"
+	"github.com/michele-brambilla/kstream/v2/pkg/errors"
+	"github.com/michele-brambilla/kstream/v2/streams/encoding"
+	"github.com/michele-brambilla/kstream/v2/streams/state_stores"
+	"github.com/michele-brambilla/kstream/v2/streams/stores"
+	"github.com/michele-brambilla/kstream/v2/streams/tasks"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 	"github.com/tryfix/log"
 	"github.com/tryfix/metrics/v2"
 )
@@ -284,7 +284,7 @@ func (b *StreamBuilder) setupOpts(opts ...BuilderOpt) {
 	b.providers.consumer = providers.Consumer
 	b.providers.producer = providers.Producer
 
-	fmt.Printf("Using providers: groupConsumer=%T, consumer=%T, producer=%T",
+	fmt.Printf("Using providers: groupConsumer=%T, consumer=%T, producer=%T\n",
 		b.providers.groupConsumer, b.providers.consumer, b.providers.producer)
 
 	for _, opt := range opts {

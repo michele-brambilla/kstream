@@ -9,10 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gmbyapa/kstream/v2/kafka"
-	"github.com/gmbyapa/kstream/v2/kafka/adaptors"
-	"github.com/gmbyapa/kstream/v2/streams"
-	"github.com/gmbyapa/kstream/v2/streams/encoding"
+	"github.com/michele-brambilla/kstream/v2/kafka/adaptors"
+
+	"github.com/michele-brambilla/kstream/v2/kafka"
+	"github.com/michele-brambilla/kstream/v2/streams"
+	"github.com/michele-brambilla/kstream/v2/streams/encoding"
 	"github.com/tryfix/log"
 
 	"net/http"
@@ -32,11 +33,12 @@ func main() {
 	flag.Parse()
 
 	config := streams.NewStreamBuilderConfig()
+	config.Logger = log.StdLogger.NewLog(log.WithLevel(log.TRACE))
 	config.BootstrapServers = strings.Split(*bootstrapServers, `,`)
 	config.ApplicationId = `kstream-branching`
 	config.Consumer.Offsets.Initial = kafka.OffsetEarliest
 
-	seed(config.Logger)
+	// seed(config.Logger)
 
 	builder := streams.NewStreamBuilder(config)
 	buildTopology(builder)

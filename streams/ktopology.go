@@ -2,7 +2,7 @@ package streams
 
 import (
 	"fmt"
-	"github.com/gmbyapa/kstream/v2/streams/topology"
+	"github.com/michele-brambilla/kstream/v2/streams/topology"
 )
 
 type kTopology struct {
