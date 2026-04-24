@@ -62,21 +62,19 @@ func NewAdmin(bootstrapServers []string, options ...AdminOption) kafka.Admin {
 	}
 }
 
-func (a *kAdmin) ctx() context.Context {
-	ctx, cancel := context.WithTimeout(context.Background(), a.timeout)
-	// Caller expects a context; ensure cancel is available to avoid leaks.
-	// Defer cancel here would cancel too early; so return a derived context and
-	// rely on the immediate caller to cancel if appropriate. As a compromise,
-	// attach a finalizer-like goroutine to cancel after timeout to ensure no leak.
-	go func() {
-		<-ctx.Done()
-		cancel()
-	}()
-	return ctx
+func (a *kAdmin) ctx() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), a.timeout)
+}
+
+// callCtx is a helper to call admin methods with a timed context and deferred cancel.
+func (a *kAdmin) callCtx() (context.Context, context.CancelFunc) {
+	return a.ctx()
 }
 
 func (a *kAdmin) FetchInfo(topics []string) (map[string]*kafka.Topic, error) {
-	details, err := a.admin.ListTopics(a.ctx(), topics...)
+	ctx, cancel := a.callCtx()
+	defer cancel()
+	details, err := a.admin.ListTopics(ctx, topics...)
 	if err != nil {
 		return nil, errors.Wrap(err, `franz admin FetchInfo: ListTopics failed`)
 	}
@@ -120,26 +118,39 @@ func (a *kAdmin) CreateTopics(topics []*kafka.Topic) error {
 			configs[k] = &v
 		}
 
-		responses, err := a.admin.CreateTopics(a.ctx(), t.NumPartitions, t.ReplicationFactor, configs, t.Name)
-		if err != nil {
-			return errors.Wrapf(err, `franz admin CreateTopics: topic [%s] failed`, t.Name)
-		}
-
-		for _, resp := range responses {
-			if resp.Err != nil {
-				// Ignore already-exists — same as librd adaptor.
-				if errors.Is(resp.Err, kerr.TopicAlreadyExists) {
-					continue
-				}
-				return errors.Wrapf(resp.Err, `franz admin CreateTopics: topic [%s] error`, resp.Topic)
+		// Scope the context to an inner function so its cancel runs at the end of
+		// this iteration instead of being deferred until CreateTopics returns for
+		// the entire topics slice.
+		err := func() error {
+			ctx, cancel := a.callCtx()
+			defer cancel()
+			responses, err := a.admin.CreateTopics(ctx, t.NumPartitions, t.ReplicationFactor, configs, t.Name)
+			if err != nil {
+				return errors.Wrapf(err, `franz admin CreateTopics: topic [%s] failed`, t.Name)
 			}
+
+			for _, resp := range responses {
+				if resp.Err != nil {
+					// Ignore already-exists — same as librd adaptor.
+					if errors.Is(resp.Err, kerr.TopicAlreadyExists) {
+						continue
+					}
+					return errors.Wrapf(resp.Err, `franz admin CreateTopics: topic [%s] error`, resp.Topic)
+				}
+			}
+			return nil
+		}()
+		if err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
 func (a *kAdmin) ListTopics() ([]string, error) {
-	details, err := a.admin.ListTopics(a.ctx())
+	ctx, cancel := a.callCtx()
+	defer cancel()
+	details, err := a.admin.ListTopics(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, `franz admin ListTopics failed`)
 	}
@@ -165,7 +176,9 @@ func (a *kAdmin) ApplyConfigs() error {
 }
 
 func (a *kAdmin) DeleteTopics(topics []string) error {
-	responses, err := a.admin.DeleteTopics(a.ctx(), topics...)
+	ctx, cancel := a.callCtx()
+	defer cancel()
+	responses, err := a.admin.DeleteTopics(ctx, topics...)
 	if err != nil {
 		return errors.Wrap(err, `franz admin DeleteTopics failed`)
 	}

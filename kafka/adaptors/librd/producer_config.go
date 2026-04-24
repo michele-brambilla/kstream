@@ -23,6 +23,18 @@ func NewProducerConfig() *ProducerConfig {
 }
 
 func (conf *ProducerConfig) validate() error {
+	if conf == nil {
+		return errors.New(`producer config is nil`)
+	}
+	if conf.ProducerConfig == nil {
+		return errors.New(`producer: missing ProducerConfig`)
+	}
+	if conf.ProducerConfig.BootstrapServers == nil || len(conf.ProducerConfig.BootstrapServers) == 0 {
+		return errors.New(`producer: BootstrapServers must not be empty`)
+	}
+	if conf.Transactional.Enabled && conf.Transactional.Id == "" {
+		return errors.New(`producer: transactional id must be set when transactions are enabled`)
+	}
 	return nil
 }
 

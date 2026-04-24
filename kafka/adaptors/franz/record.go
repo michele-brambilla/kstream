@@ -21,11 +21,11 @@ func (r *record) WithCtx(ctx context.Context) kafka.Record {
 	return &record{ctx: ctx, kRec: r.kRec}
 }
 
-func (r *record) Key() []byte       { return r.kRec.Key }
-func (r *record) Value() []byte     { return r.kRec.Value }
-func (r *record) Topic() string      { return r.kRec.Topic }
-func (r *record) Partition() int32   { return r.kRec.Partition }
-func (r *record) Offset() int64      { return r.kRec.Offset }
+func (r *record) Key() []byte          { return r.kRec.Key }
+func (r *record) Value() []byte        { return r.kRec.Value }
+func (r *record) Topic() string        { return r.kRec.Topic }
+func (r *record) Partition() int32     { return r.kRec.Partition }
+func (r *record) Offset() int64        { return r.kRec.Offset }
 func (r *record) Timestamp() time.Time { return r.kRec.Timestamp }
 
 func (r *record) Headers() kafka.RecordHeaders {
@@ -66,12 +66,12 @@ func (r *producerRecord) WithCtx(ctx context.Context) kafka.Record {
 	return &cp
 }
 
-func (r *producerRecord) Key() []byte         { return r.key }
-func (r *producerRecord) Value() []byte       { return r.value }
-func (r *producerRecord) Topic() string        { return r.topic }
-func (r *producerRecord) Partition() int32     { return r.partition }
-func (r *producerRecord) Offset() int64        { return 0 }
-func (r *producerRecord) Timestamp() time.Time { return r.timestamp }
+func (r *producerRecord) Key() []byte                  { return r.key }
+func (r *producerRecord) Value() []byte                { return r.value }
+func (r *producerRecord) Topic() string                { return r.topic }
+func (r *producerRecord) Partition() int32             { return r.partition }
+func (r *producerRecord) Offset() int64                { return 0 }
+func (r *producerRecord) Timestamp() time.Time         { return r.timestamp }
 func (r *producerRecord) Headers() kafka.RecordHeaders { return r.headers }
 func (r *producerRecord) String() string {
 	return fmt.Sprintf(`%s[%d]@producer`, r.topic, r.partition)

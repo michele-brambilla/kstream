@@ -76,12 +76,14 @@ func (c *producerProvider) NewBuilder(conf *kafka.ProducerConfig) kafka.Producer
 }
 
 func NewProducer(configs *ProducerConfig) (kafka.Producer, error) {
-	if err := configs.setUp(); err != nil {
-		return nil, errors.Wrap(err, `producer configs setup failed`)
-	}
-
+	// Validate early so nil or clearly invalid configs fail fast before any setup
+	// that may dereference fields.
 	if err := configs.validate(); err != nil {
 		return nil, errors.Wrap(err, `invalid producer configs`)
+	}
+
+	if err := configs.setUp(); err != nil {
+		return nil, errors.Wrap(err, `producer configs setup failed`)
 	}
 
 	loggerPrefix := `Producer`
@@ -89,6 +91,14 @@ func NewProducer(configs *ProducerConfig) (kafka.Producer, error) {
 		loggerPrefix = `TransactionalProducer`
 	}
 
+	// Ensure logger and metrics reporter defaults so builders that provide a
+	// minimal *kafka.ProducerConfig{} don't cause nil pointer derefs.
+	if configs.Logger == nil {
+		configs.Logger = log.NewNoopLogger()
+	}
+	if configs.MetricsReporter == nil {
+		configs.MetricsReporter = metrics.NoopReporter()
+	}
 	configs.Logger = configs.Logger.NewLog(log.Prefixed(fmt.Sprintf(`%s(librdkafka)`, loggerPrefix)))
 
 	configs.Logger.Info(`Producer initiating...`)

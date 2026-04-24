@@ -208,7 +208,9 @@ func (p *franzProducer) SendOffsetsToTransaction(ctx context.Context, offsets []
 	// for at-least-once semantics but does NOT provide EOS guarantees.
 	kadmOffsets := make(kadm.Offsets)
 	for _, o := range offsets {
-		kadmOffsets.AddOffset(o.Topic, o.Partition, o.Offset+1, -1)
+		// ConsumerOffset.Offset is stored as the next offset to commit (record.Offset()+1),
+		// so do not add another +1 here or we'll commit past the intended message.
+		kadmOffsets.AddOffset(o.Topic, o.Partition, o.Offset, -1)
 	}
 
 	if _, err := p.admin.CommitOffsets(ctx, groupID, kadmOffsets); err != nil {
