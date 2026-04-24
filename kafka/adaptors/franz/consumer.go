@@ -70,11 +70,23 @@ type groupConsumer struct {
 	stopCh   chan struct{}
 }
 
+func (g *groupConsumer) drainErrors() {
+	for err := range g.errs {
+		fmt.Printf("franz err: %v\n", err)
+	}
+}
+
 func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) {
 	offset := kgo.NewOffset().AtEnd()
 	if config.Offsets.Initial == kafka.OffsetEarliest {
 		offset = kgo.NewOffset().AtStart()
 	}
+
+	// handlerPtr allows the OnPartitionsAssigned callback to invoke the user's
+	// rebalance handler even before the consumeLoop sees records. It will be
+	// set after the groupConsumer is created and the Subscribe call stores the
+	// handler reference.
+	var handlerPtr *kafka.RebalanceHandler
 
 	opts := []kgo.Opt{
 		kgo.SeedBrokers(config.BootstrapServers...),
@@ -83,6 +95,54 @@ func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) 
 		kgo.ConsumeResetOffset(offset),
 		kgo.OnPartitionsRevoked(func(ctx context.Context, cl *kgo.Client, _ map[string][]int32) {
 			_ = cl.CommitUncommittedOffsets(ctx)
+		}),
+		kgo.OnPartitionsAssigned(func(ctx context.Context, cl *kgo.Client, assigned map[string][]int32) {
+			// If the handler hasn't been set yet, nothing to do.
+			if handlerPtr == nil || *handlerPtr == nil {
+				return
+			}
+
+
+			// Convert assigned map to kafka.TopicPartitions
+			tps := make(kafka.TopicPartitions, 0, 32)
+			for topic, parts := range assigned {
+				for _, p := range parts {
+					tps = append(tps, kafka.TopicPartition{Topic: topic, Partition: p})
+				}
+			}
+
+			sess := &groupSession{
+				client:  cl,
+				tps:     tps,
+				assign:  &assignment{tps: tps},
+				groupID: config.GroupId,
+			}
+
+			// Invoke the user's rebalance handler so it can restore/init tasks and
+			// optionally set reset offsets on the session's assignment.
+			if err := (*handlerPtr).OnPartitionAssigned(ctx, sess); err != nil {
+				fmt.Printf("franz: OnPartitionAssigned error: %v\n", err)
+			}
+
+			// Apply any requested offset resets from the session back to the client
+			// so the consumer starts from the intended offsets.
+			if sess.assign != nil && sess.assign.resets != nil {
+				parts := make(map[string]map[int32]kgo.Offset)
+				for tp, off := range sess.assign.resets {
+					if parts[tp.Topic] == nil {
+						parts[tp.Topic] = make(map[int32]kgo.Offset)
+					}
+					parts[tp.Topic][tp.Partition] = toKgoOffset(off)
+				}
+				if len(parts) > 0 {
+					fmt.Printf("franz: applying offset resets to client: %v\n", parts)
+					// Apply offsets asynchronously to avoid calling client mutators while
+					// inside franz-go's internal callback locks which may deadlock.
+					go func(p map[string]map[int32]kgo.Offset) {
+						cl.AddConsumePartitions(p)
+					}(parts)
+				}
+			}
 		}),
 	}
 
@@ -97,12 +157,17 @@ func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) 
 		return nil, errors.Wrap(err, `franz group consumer init failed`)
 	}
 
-	return &groupConsumer{
+	gc := &groupConsumer{
 		client: client,
 		config: config,
 		errs:   make(chan error, 8),
 		stopCh: make(chan struct{}),
-	}, nil
+	}
+	// Wire the handler pointer so the assigned callback can call the user's handler
+	handlerPtr = &gc.handler
+	// Drain internal errors to stdout for visibility during debugging.
+	go gc.drainErrors()
+	return gc, nil
 }
 
 func (g *groupConsumer) Subscribe(topics []string, handler kafka.RebalanceHandler) error {
@@ -160,8 +225,11 @@ func (g *groupConsumer) consumeLoop() {
 		}
 
 		if g.handler != nil {
+			fmt.Printf("franz: invoking OnPartitionAssigned tps=%v\n", tps)
 			if err := g.handler.OnPartitionAssigned(ctx, sess); err != nil {
 				g.errs <- errors.Wrap(err, `OnPartitionAssigned error`)
+			} else {
+				fmt.Printf("franz: OnPartitionAssigned returned successfully for tps=%v\n", tps)
 			}
 		}
 
