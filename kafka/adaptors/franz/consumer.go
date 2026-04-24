@@ -71,8 +71,10 @@ type groupConsumer struct {
 }
 
 func (g *groupConsumer) drainErrors() {
-	for err := range g.errs {
-		fmt.Printf("franz err: %v\n", err)
+	// Consume errors so the channel doesn't block; errors are surfaced via
+	// the Errors() channel for callers to handle. Do not print to stdout.
+	for range g.errs {
+		// intentionally discard here
 	}
 }
 
@@ -121,7 +123,11 @@ func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) 
 			// Invoke the user's rebalance handler so it can restore/init tasks and
 			// optionally set reset offsets on the session's assignment.
 			if err := (*handlerPtr).OnPartitionAssigned(ctx, sess); err != nil {
-				fmt.Printf("franz: OnPartitionAssigned error: %v\n", err)
+				// Surface the error to the group consumer's error channel so callers can
+				// observe and log it appropriately instead of printing to stdout.
+				if gErr := g.errs; gErr != nil {
+					gErr <- errors.Wrap(err, `OnPartitionAssigned error`)
+				}
 			}
 
 			// Apply any requested offset resets from the session back to the client
