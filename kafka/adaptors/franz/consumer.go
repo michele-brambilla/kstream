@@ -126,8 +126,8 @@ func newGroupConsumer(config *GroupConsumerConfig) (kafka.GroupConsumer, error) 
 			if err := (*handlerPtr).OnPartitionAssigned(ctx, sess); err != nil {
 				// Surface the error to the group consumer's error channel so callers can
 				// observe and log it appropriately instead of printing to stdout.
-				if gErr := g.errs; gErr != nil {
-					gErr <- errors.Wrap(err, `OnPartitionAssigned error`)
+				if errs != nil {
+					errs <- errors.Wrap(err, `OnPartitionAssigned error`)
 				}
 			}
 
